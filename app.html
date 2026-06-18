@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THANOMSIN - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .sidebar { background: #1e293b; }
+        .sidebar-item { @apply px-4 py-3 hover:bg-slate-700 cursor-pointer transition border-l-4 border-transparent hover:border-blue-500; }
+        .sidebar-item.active { @apply bg-slate-700 border-blue-500; }
+        .card { @apply bg-white rounded-lg shadow-md p-6; }
+        .btn-primary { @apply bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition; }
+        .btn-secondary { @apply bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg transition; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <div class="sidebar w-64 text-white overflow-y-auto">
+            <div class="p-6 border-b border-slate-700">
+                <h1 class="text-2xl font-bold">THANOMSIN</h1>
+                <p class="text-slate-400 text-sm">ENGINEERING</p>
+            </div>
+            <nav class="mt-8">
+                <div class="sidebar-item active" data-section="dashboard">📊 Dashboard</div>
+                <div class="sidebar-item" data-section="expenses">💰 Expenses</div>
+                <div class="sidebar-item" data-section="invoices">📄 Invoices</div>
+                <div class="sidebar-item" data-section="projects">🏗️ Projects</div>
+                <div class="sidebar-item" data-section="customers">👥 Customers</div>
+                <div class="sidebar-item" data-section="wht">🧾 WHT</div>
+                <div class="sidebar-item" data-section="settings">⚙️ Settings</div>
+            </nav>
+            <div class="absolute bottom-0 w-64 p-4 border-t border-slate-700">
+                <button id="logoutBtn" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition">🚪 Logout</button>
+            </div>
+        </div>
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <div class="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center">
+                <h2 id="pageTitle" class="text-2xl font-bold text-gray-800">Dashboard</h2>
+                <div class="flex items-center gap-4">
+                    <span id="userEmail" class="text-gray-600 text-sm"></span>
+                    <div class="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold">👤</div>
+                </div>
+            </div>
+            <div class="flex-1 overflow-y-auto p-8">
+                <div id="dashboard-content" class="section-content">
+                    <div class="grid grid-cols-4 gap-4 mb-8">
+                        <div class="card"><p class="text-gray-600 text-sm">Total Expenses</p><h3 id="totalExpenses" class="text-3xl font-bold text-gray-800 mt-2">฿0</h3></div>
+                        <div class="card"><p class="text-gray-600 text-sm">Total Income</p><h3 id="totalIncome" class="text-3xl font-bold text-green-600 mt-2">฿0</h3></div>
+                        <div class="card"><p class="text-gray-600 text-sm">Net Profit</p><h3 id="netProfit" class="text-3xl font-bold text-blue-600 mt-2">฿0</h3></div>
+                        <div class="card"><p class="text-gray-600 text-sm">Projects Active</p><h3 id="activeProjects" class="text-3xl font-bold text-purple-600 mt-2">0</h3></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-8">
+                        <div class="card"><h3 class="text-lg font-bold text-gray-800 mb-4">Expenses Trend</h3><canvas id="expenseChart"></canvas></div>
+                        <div class="card"><h3 class="text-lg font-bold text-gray-800 mb-4">Income vs Expenses</h3><canvas id="profitChart"></canvas></div>
+                    </div>
+                </div>
+                <div id="expenses-content" class="section-content hidden">
+                    <div class="mb-4 flex justify-between items-center"><h3 class="text-xl font-bold">Manage Expenses</h3><button class="btn-primary" id="addExpenseBtn">+ Add Expense</button></div>
+                    <div class="card"><table class="w-full"><thead><tr class="border-b"><th class="text-left py-3 px-4">Date</th><th class="text-left py-3 px-4">Description</th><th class="text-left py-3 px-4">Amount</th><th class="text-left py-3 px-4">Category</th><th class="text-left py-3 px-4">Actions</th></tr></thead><tbody id="expenseTable"><tr><td colspan="5" class="text-center py-8 text-gray-500">No expenses yet</td></tr></tbody></table></div>
+                </div>
+                <div id="invoices-content" class="section-content hidden">
+                    <div class="mb-4 flex justify-between items-center"><h3 class="text-xl font-bold">Invoices</h3><button class="btn-primary" id="addInvoiceBtn">+ Add Invoice</button></div>
+                    <div class="card"><p class="text-gray-500 text-center py-8">Invoices feature coming soon...</p></div>
+                </div>
+                <div id="projects-content" class="section-content hidden">
+                    <div class="mb-4 flex justify-between items-center"><h3 class="text-xl font-bold">Projects</h3><button class="btn-primary" id="addProjectBtn">+ Add Project</button></div>
+                    <div class="card"><table class="w-full"><thead><tr class="border-b"><th class="text-left py-3 px-4">Project Name</th><th class="text-left py-3 px-4">Status</th><th class="text-left py-3 px-4">Budget</th><th class="text-left py-3 px-4">Actions</th></tr></thead><tbody id="projectTable"><tr><td colspan="4" class="text-center py-8 text-gray-500">No projects yet</td></tr></tbody></table></div>
+                </div>
+                <div id="customers-content" class="section-content hidden">
+                    <div class="mb-4 flex justify-between items-center"><h3 class="text-xl font-bold">Customers</h3><button class="btn-primary" id="addCustomerBtn">+ Add Customer</button></div>
+                    <div class="card"><table class="w-full"><thead><tr class="border-b"><th class="text-left py-3 px-4">Company Name</th><th class="text-left py-3 px-4">Contact</th><th class="text-left py-3 px-4">Phone</th><th class="text-left py-3 px-4">Actions</th></tr></thead><tbody id="customerTable"><tr><td colspan="4" class="text-center py-8 text-gray-500">No customers yet</td></tr></tbody></table></div>
+                </div>
+                <div id="wht-content" class="section-content hidden"><h3 class="text-xl font-bold mb-4">Withholding Tax (WHT)</h3><div class="card"><p class="text-gray-500 text-center py-8">WHT records will appear here...</p></div></div>
+                <div id="settings-content" class="section-content hidden">
+                    <h3 class="text-xl font-bold mb-4">Settings</h3>
+                    <div class="card">
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Supabase API Configuration</label>
+                            <p class="text-gray-600 text-sm mb-4">Enter your Supabase project credentials:</p>
+                            <div class="mb-4"><label class="block text-xs font-medium text-gray-600 mb-2">Supabase URL</label><input type="text" id="supabaseUrl" placeholder="https://xxxxx.supabase.co" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"></div>
+                            <div class="mb-4"><label class="block text-xs font-medium text-gray-600 mb-2">Anon Key</label><input type="password" id="supabaseKey" placeholder="eyJhbGc..." class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"></div>
+                            <button id="saveConfigBtn" class="btn-primary">💾 Save Configuration</button>
+                            <p class="text-xs text-gray-500 mt-2">Keys are saved locally in your browser (localStorage)</p>
+                        </div>
+                        <hr class="my-6">
+                        <div><label class="block text-sm font-medium text-gray-700 mb-4">Account</label><button id="changePasswordBtn" class="btn-secondary mb-2 mr-2">Change Password</button><button id="deleteAccountBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition">Delete Account</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
